@@ -1,0 +1,8 @@
+{
+  "name": "mama-bill-create-webapp",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "check": "node --check app.js && node --check api/login.js && node --check api/tenant-lookup.js && node --check api/create-bill.js && node --check api/_auth.js"
+  }
+}

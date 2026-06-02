@@ -1,7 +1,4 @@
-const N8N_WEBHOOK_URL = "";
-const DEMO_MODE_WHEN_WEBHOOK_EMPTY = true;
-const APPS_SCRIPT_URL =
-  "https://script.google.com/macros/s/AKfycbxlBLEHe_BvZjhd6UBipRe1AKA1_KSt8BS54OfgeYckVyOjEqabw83w4lnGQArLvcTf/exec";
+const SESSION_TOKEN_KEY = "mama_bill_manager_session";
 
 const ROOM_IDS = [
   "A601",
@@ -194,12 +191,17 @@ const dateOnlyFormatter = new Intl.DateTimeFormat("th-TH", {
 });
 
 const screens = {
+  login: document.querySelector("#login-screen"),
   form: document.querySelector("#form-screen"),
   loading: document.querySelector("#loading-screen"),
   success: document.querySelector("#success-screen"),
   error: document.querySelector("#error-screen"),
 };
 
+const loginForm = document.querySelector("#login-form");
+const managerPasswordInput = document.querySelector("#manager-password");
+const loginButton = document.querySelector("#login-button");
+const loginError = document.querySelector("#login-error");
 const form = document.querySelector("#bill-form");
 const fields = {
   building: document.querySelector("#building"),
@@ -229,6 +231,7 @@ const resetButton = document.querySelector("#reset-button");
 const retryButton = document.querySelector("#retry-button");
 const editButton = document.querySelector("#edit-button");
 const newBillButton = document.querySelector("#new-bill-button");
+const logoutButton = document.querySelector("#logout-button");
 const errorDetail = document.querySelector("#error-detail");
 
 let lastPayload = null;
@@ -257,6 +260,18 @@ function parseJsonText(text) {
   }
 }
 
+function getSessionToken() {
+  return sessionStorage.getItem(SESSION_TOKEN_KEY) || "";
+}
+
+function setSessionToken(token) {
+  sessionStorage.setItem(SESSION_TOKEN_KEY, token);
+}
+
+function clearSessionToken() {
+  sessionStorage.removeItem(SESSION_TOKEN_KEY);
+}
+
 function formatDateOnly(dateText) {
   if (!dateText) {
     return "-";
@@ -283,9 +298,61 @@ function showScreen(name) {
   window.scrollTo({ top: 0, behavior: "smooth" });
 }
 
+function setLoginError(message) {
+  loginError.textContent = message;
+  loginError.hidden = !message;
+}
+
 function setFormError(message) {
   formError.textContent = message;
   formError.hidden = !message;
+}
+
+async function authenticatedFetch(url, options = {}) {
+  const token = getSessionToken();
+  const headers = new Headers(options.headers || {});
+  headers.set("Authorization", `Bearer ${token}`);
+
+  const response = await fetch(url, {
+    ...options,
+    headers,
+  });
+
+  if (response.status === 401) {
+    clearSessionToken();
+    showScreen("login");
+    throw new Error("กรุณาเข้าสู่ระบบอีกครั้ง");
+  }
+
+  return response;
+}
+
+async function login(password) {
+  loginButton.disabled = true;
+  setLoginError("");
+
+  try {
+    const response = await fetch("/api/login", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ password }),
+    });
+    const result = await response.json();
+
+    if (!response.ok || !result.success || !result.token) {
+      throw new Error(result.message || "เข้าสู่ระบบไม่สำเร็จ");
+    }
+
+    setSessionToken(result.token);
+    managerPasswordInput.value = "";
+    showScreen("form");
+  } catch (error) {
+    setLoginError(error.message || "เข้าสู่ระบบไม่สำเร็จ");
+  } finally {
+    loginButton.disabled = false;
+  }
 }
 
 function setTenantLookupStatus(message, isError = false) {
@@ -353,13 +420,11 @@ function setTenant(data) {
 }
 
 async function requestTenantByRoomId(roomId) {
-  const url = new URL(APPS_SCRIPT_URL);
-  url.searchParams.set("action", "tenantByRoomId");
+  const url = new URL("/api/tenant-lookup", window.location.origin);
   url.searchParams.set("roomId", roomId);
 
-  const response = await fetch(url.toString(), {
+  const response = await authenticatedFetch(url.toString(), {
     method: "GET",
-    redirect: "follow",
     cache: "no-store",
     signal: tenantLookupController?.signal,
   });
@@ -500,24 +565,7 @@ function createDemoBillId() {
 }
 
 async function submitToWebhook(payload) {
-  if (!N8N_WEBHOOK_URL && DEMO_MODE_WHEN_WEBHOOK_EMPTY) {
-    await new Promise((resolve) => setTimeout(resolve, 1200));
-    return {
-      success: true,
-      billId: createDemoBillId(),
-      room: payload.room,
-      billTitle: payload.billTitle,
-      amountDue: payload.amountDue,
-      status: "Awaiting Payment",
-      message: "Demo bill created.",
-    };
-  }
-
-  if (!N8N_WEBHOOK_URL) {
-    throw new Error("ยังไม่ได้ตั้งค่า N8N_WEBHOOK_URL ใน app.js");
-  }
-
-  const response = await fetch(N8N_WEBHOOK_URL, {
+  const response = await authenticatedFetch("/api/create-bill", {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
@@ -590,6 +638,11 @@ fields.floor.addEventListener("change", handleFloorChange);
 fields.room.addEventListener("change", updateTenantFromRoom);
 fields.billType.addEventListener("change", applyBillTypeDefaults);
 
+loginForm.addEventListener("submit", (event) => {
+  event.preventDefault();
+  login(managerPasswordInput.value);
+});
+
 form.addEventListener("submit", (event) => {
   event.preventDefault();
   submitBill();
@@ -608,6 +661,15 @@ newBillButton.addEventListener("click", () => {
   resetForm();
   showScreen("form");
 });
+logoutButton.addEventListener("click", () => {
+  clearSessionToken();
+  resetForm();
+  showScreen("login");
+});
 
 populateBuildings();
 setDefaultDueDate();
+
+if (getSessionToken()) {
+  showScreen("form");
+}

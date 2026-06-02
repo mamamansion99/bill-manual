@@ -56,6 +56,30 @@ textarea {
   margin: 4px 2px 18px;
 }
 
+.login-card {
+  margin: min(16vh, 120px) auto 0;
+  border: 1px solid rgba(220, 231, 245, 0.92);
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.96);
+  box-shadow: var(--shadow);
+  padding: 24px 18px;
+}
+
+.login-copy {
+  color: var(--muted);
+  line-height: 1.65;
+}
+
+.login-card .primary-button {
+  width: 100%;
+}
+
+.manager-actions {
+  display: grid;
+  justify-items: center;
+  gap: 8px;
+}
+
 .eyebrow {
   margin: 0 0 4px;
   color: var(--primary);
@@ -90,6 +114,21 @@ h1 {
   color: var(--primary);
   font-weight: 800;
   box-shadow: var(--shadow);
+}
+
+.icon-text-button {
+  min-height: 0;
+  border-radius: 8px;
+  background: transparent;
+  color: var(--muted);
+  padding: 4px 8px;
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.icon-text-button:hover {
+  color: var(--primary);
+  background: rgba(37, 99, 235, 0.08);
 }
 
 .bill-card,
@@ -561,6 +600,11 @@ ol {
 @media (min-width: 620px) {
   .app-shell {
     padding-top: 40px;
+  }
+
+  .login-card {
+    max-width: 440px;
+    padding: 30px;
   }
 
   .bill-card {

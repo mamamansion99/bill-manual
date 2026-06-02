@@ -4,6 +4,8 @@
 
 Build a mobile-first bill creation webapp for Mama Mansion manager/admin.
 
+Public deployment requirement: keep Apps Script URL, n8n webhook URL, manager password, and shared secrets on the Vercel server side.
+
 The manager flow is:
 
 1. Open webapp.
@@ -23,16 +25,19 @@ Version 1 does not include login, bill history, paid status, or tenant-facing sc
 1. Create a new standalone folder under `d:\Ma\Mama System`.
 2. Build a plain static webapp with `index.html`, `styles.css`, and `app.js`.
 3. Reuse the `mama_inform_project` `ROOM_IDS` room master.
-4. Fetch tenant details from `GET ?action=tenantByRoomId&roomId={{roomId}}`.
-5. Keep the n8n webhook URL configurable in `app.js`.
-6. Send bill payload plus room lookup fields to n8n.
-7. Wait for n8n to create the final `BillID`.
-8. Render success details from the n8n response.
-9. Add a README with setup and webhook contract notes.
+4. Add a login gate backed by `MANAGER_PASSWORD`.
+5. Fetch tenant details through protected `/api/tenant-lookup`.
+6. Create bills through protected `/api/create-bill`.
+7. Keep Apps Script and n8n URLs in Vercel environment variables.
+8. Send bill payload plus room lookup fields to n8n.
+9. Wait for n8n to create the final `BillID`.
+10. Render success details from the n8n response.
+11. Add a README with setup and webhook contract notes.
 
 ## v1 Components
 
 - `BillCreatePage`
+- `LoginPage`
 - `BillFormCard`
 - `RoomSelector`
 - `TenantLookupPanel`

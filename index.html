@@ -14,13 +14,33 @@
   </head>
   <body>
     <main class="app-shell">
-      <section class="screen screen-active" id="form-screen" aria-labelledby="page-title">
+      <section class="screen screen-active" id="login-screen" aria-labelledby="login-title">
+        <div class="login-card">
+          <p class="eyebrow">Mama Mansion</p>
+          <h1 id="login-title">เข้าสู่ระบบผู้จัดการ</h1>
+          <p class="login-copy">กรอกรหัสผ่านเพื่อสร้างบิลและโหลดข้อมูลลูกบ้าน</p>
+
+          <form id="login-form" novalidate>
+            <label class="field">
+              <span>รหัสผ่าน</span>
+              <input id="manager-password" type="password" autocomplete="current-password" required />
+            </label>
+            <div class="error-box" id="login-error" role="alert" hidden></div>
+            <button class="primary-button" type="submit" id="login-button">เข้าสู่ระบบ</button>
+          </form>
+        </div>
+      </section>
+
+      <section class="screen" id="form-screen" aria-labelledby="page-title">
         <div class="brand-row">
           <div>
             <p class="eyebrow">Mama Mansion</p>
             <h1 id="page-title">สร้างบิลชำระเงิน</h1>
           </div>
-          <div class="manager-chip" aria-label="ผู้สร้างบิล">Ma</div>
+          <div class="manager-actions">
+            <div class="manager-chip" aria-label="ผู้สร้างบิล">Ma</div>
+            <button class="icon-text-button" type="button" id="logout-button">ออก</button>
+          </div>
         </div>
 
         <form class="bill-card" id="bill-form" novalidate>
