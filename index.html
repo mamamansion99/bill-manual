@@ -1,0 +1,232 @@
+<!doctype html>
+<html lang="th">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Mama Mansion Bill Create</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Noto+Sans+Thai:wght@400;500;600;700;800&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="./styles.css" />
+  </head>
+  <body>
+    <main class="app-shell">
+      <section class="screen screen-active" id="form-screen" aria-labelledby="page-title">
+        <div class="brand-row">
+          <div>
+            <p class="eyebrow">Mama Mansion</p>
+            <h1 id="page-title">สร้างบิลชำระเงิน</h1>
+          </div>
+          <div class="manager-chip" aria-label="ผู้สร้างบิล">Ma</div>
+        </div>
+
+        <form class="bill-card" id="bill-form" novalidate>
+          <div class="field-grid three-columns">
+            <label class="field">
+              <span>ตึก</span>
+              <select id="building" name="building" required>
+                <option value="">กำลังโหลดตึก...</option>
+              </select>
+            </label>
+
+            <label class="field">
+              <span>ชั้น</span>
+              <select id="floor" name="floor" required disabled>
+                <option value="">เลือกชั้น</option>
+              </select>
+            </label>
+
+            <label class="field">
+              <span>ห้อง</span>
+              <select id="room" name="room" required disabled>
+                <option value="">เลือกห้อง</option>
+              </select>
+            </label>
+          </div>
+
+          <label class="field">
+            <span>ชื่อลูกบ้าน</span>
+            <input
+              id="tenant-name"
+              name="tenantName"
+              type="text"
+              placeholder="ระบบจะเติมให้อัตโนมัติ"
+              readonly
+            />
+          </label>
+
+          <input id="tenant-line-user-id" name="tenantLineUserId" type="hidden" />
+          <input id="tenant-phone" name="tenantPhone" type="hidden" />
+          <input id="tenant-move-in-date" name="tenantMoveInDate" type="hidden" />
+          <input id="tenant-lease-id" name="tenantLeaseId" type="hidden" />
+
+          <div class="tenant-lookup-panel" id="tenant-lookup-panel">
+            <div>
+              <span>สถานะข้อมูลห้อง</span>
+              <strong id="tenant-lookup-status">เลือกตึก ชั้น และห้อง เพื่อโหลดข้อมูลลูกบ้าน</strong>
+            </div>
+            <dl id="tenant-lookup-details" hidden>
+              <div>
+                <dt>เบอร์โทร</dt>
+                <dd id="tenant-phone-display">-</dd>
+              </div>
+              <div>
+                <dt>วันที่เข้าอยู่</dt>
+                <dd id="tenant-move-in-display">-</dd>
+              </div>
+              <div>
+                <dt>Lease ID</dt>
+                <dd id="tenant-lease-display">-</dd>
+              </div>
+            </dl>
+          </div>
+
+          <label class="field">
+            <span>ประเภทบิล</span>
+            <select id="bill-type" name="billType" required>
+              <option value="">เลือกประเภทบิล</option>
+              <option value="CLEANING">ค่าทำความสะอาด</option>
+              <option value="KEY">ค่ากุญแจ</option>
+              <option value="DAMAGE">ค่าเสียหาย</option>
+              <option value="PARKING">ค่าที่จอดรถ</option>
+              <option value="UTILITY">ค่าน้ำ / ค่าไฟ / ค่าสาธารณูปโภค</option>
+              <option value="OTHER">ค่าใช้จ่ายอื่น ๆ</option>
+            </select>
+          </label>
+
+          <label class="field">
+            <span>ชื่อรายการ</span>
+            <input
+              id="bill-title"
+              name="billTitle"
+              type="text"
+              placeholder="เช่น ค่าบริการทำความสะอาด"
+              required
+            />
+          </label>
+
+          <div class="field-grid two-columns">
+            <label class="field amount-field">
+              <span>ยอดที่ต้องชำระ</span>
+              <div class="amount-control">
+                <input id="amount-due" name="amountDue" type="number" min="1" step="1" placeholder="500" required />
+                <span>บาท</span>
+              </div>
+            </label>
+
+            <label class="field">
+              <span>กำหนดชำระ</span>
+              <input id="due-date" name="dueDate" type="date" required />
+            </label>
+          </div>
+
+          <label class="field">
+            <span>รายละเอียดเพิ่มเติม</span>
+            <textarea
+              id="bill-description"
+              name="billDescription"
+              rows="4"
+              placeholder="เช่น ทำความสะอาดหลังย้ายออก / ค่าซ่อมลูกบิดประตู / รายละเอียดอื่น ๆ"
+            ></textarea>
+          </label>
+
+          <label class="field compact-field">
+            <span>ผู้สร้างบิล</span>
+            <select id="created-by" name="createdBy" required>
+              <option value="Ma">Ma</option>
+              <option value="Brother">Brother</option>
+              <option value="Admin">Admin</option>
+            </select>
+          </label>
+
+          <div class="error-box" id="form-error" role="alert" hidden></div>
+
+          <div class="button-row">
+            <button class="secondary-button" type="button" id="reset-button">ล้างข้อมูล</button>
+            <button class="primary-button" type="submit" id="submit-button">ส่งบิลให้ลูกบ้าน</button>
+          </div>
+        </form>
+      </section>
+
+      <section class="screen state-screen" id="loading-screen" aria-live="polite">
+        <div class="state-card loading-card">
+          <div class="sky-visual" aria-hidden="true">
+            <div class="cloud cloud-one"></div>
+            <div class="cloud cloud-two"></div>
+            <div class="rocket">
+              <div class="rocket-body"></div>
+              <div class="rocket-window"></div>
+              <div class="rocket-fin left"></div>
+              <div class="rocket-fin right"></div>
+              <div class="rocket-fire"></div>
+            </div>
+          </div>
+          <h2>กำลังส่งบิล<span class="dots"></span></h2>
+          <p>ระบบกำลังบันทึกรายการและส่งแจ้งเตือนไปยัง LINE ของลูกบ้าน</p>
+          <small>กรุณารอสักครู่</small>
+        </div>
+      </section>
+
+      <section class="screen state-screen" id="success-screen" aria-labelledby="success-title">
+        <div class="state-card success-card">
+          <div class="status-icon success-icon" aria-hidden="true"></div>
+          <h2 id="success-title">ส่งบิลสำเร็จ!</h2>
+          <p>ระบบบันทึกรายการและส่งแจ้งเตือนไปยังลูกบ้านเรียบร้อยแล้ว</p>
+
+          <div class="summary-card">
+            <h3>รายละเอียดบิล</h3>
+            <dl>
+              <div>
+                <dt>ห้อง</dt>
+                <dd id="summary-room">-</dd>
+              </div>
+              <div>
+                <dt>รายการ</dt>
+                <dd id="summary-title">-</dd>
+              </div>
+              <div>
+                <dt>ยอดชำระ</dt>
+                <dd id="summary-amount">-</dd>
+              </div>
+              <div>
+                <dt>เลขอ้างอิง</dt>
+                <dd id="summary-bill-id">-</dd>
+              </div>
+            </dl>
+          </div>
+
+          <div class="next-block">
+            <h3>ขั้นตอนถัดไป</h3>
+            <ol>
+              <li>ลูกบ้านกดปุ่มจ่ายรายการนี้ใน LINE</li>
+              <li>ลูกบ้านโอนเงินและส่งสลิปกลับมาในแชท</li>
+              <li>ระบบบันทึกสลิปเข้าแถวบิลเดียวกันใน Bills Sheet</li>
+            </ol>
+          </div>
+
+          <div class="button-row single-row">
+            <button class="primary-button" type="button" id="new-bill-button">สร้างบิลใหม่</button>
+          </div>
+        </div>
+      </section>
+
+      <section class="screen state-screen" id="error-screen" aria-labelledby="error-title">
+        <div class="state-card error-card">
+          <div class="status-icon error-icon" aria-hidden="true"></div>
+          <h2 id="error-title">ส่งบิลไม่สำเร็จ</h2>
+          <p>ระบบไม่สามารถบันทึกรายการได้ กรุณาตรวจสอบข้อมูลหรือลองใหม่อีกครั้ง</p>
+          <div class="error-detail" id="error-detail"></div>
+          <div class="button-row">
+            <button class="secondary-button" type="button" id="edit-button">กลับไปแก้ไขข้อมูล</button>
+            <button class="primary-button" type="button" id="retry-button">ลองใหม่อีกครั้ง</button>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <script src="./app.js"></script>
+  </body>
+</html>
