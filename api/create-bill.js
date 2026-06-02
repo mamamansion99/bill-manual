@@ -16,6 +16,37 @@ function validateBillPayload(payload) {
   return "";
 }
 
+function normalizeN8nResult({ raw, response, payload }) {
+  let parsed = null;
+  try {
+    parsed = raw ? JSON.parse(raw) : null;
+  } catch {
+    parsed = null;
+  }
+
+  if (parsed && typeof parsed === "object") {
+    return parsed;
+  }
+
+  if (response.ok) {
+    return {
+      success: true,
+      billId: "",
+      room: payload.room,
+      billTitle: payload.billTitle,
+      amountDue: payload.amountDue,
+      status: "Workflow Started",
+      message: raw || "Workflow was started",
+      responseMode: "immediate",
+    };
+  }
+
+  return {
+    success: false,
+    message: raw || "n8n returned a non-JSON response",
+  };
+}
+
 module.exports = async function handler(req, res) {
   if (req.method !== "POST") {
     sendJson(res, 405, { success: false, message: "Method not allowed" });
@@ -50,12 +81,7 @@ module.exports = async function handler(req, res) {
     });
 
     const raw = await response.text();
-    let result;
-    try {
-      result = JSON.parse(raw);
-    } catch {
-      result = { success: false, message: raw || "n8n returned a non-JSON response" };
-    }
+    const result = normalizeN8nResult({ raw, response, payload });
 
     if (!response.ok) {
       sendJson(res, response.status, {

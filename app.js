@@ -591,7 +591,7 @@ function showSuccess(result, payload) {
   document.querySelector("#summary-room").textContent = result.room || payload.room;
   document.querySelector("#summary-title").textContent = result.billTitle || payload.billTitle;
   document.querySelector("#summary-amount").textContent = `${formatMoney(result.amountDue || payload.amountDue)} บาท`;
-  document.querySelector("#summary-bill-id").textContent = result.billId || "-";
+  document.querySelector("#summary-bill-id").textContent = result.billId || "รอ n8n สร้างเลขอ้างอิง";
   showScreen("success");
 }
 

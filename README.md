@@ -120,6 +120,8 @@ GET {{APPS_SCRIPT_URL}}?action=tenantByRoomId&roomId=A101
 
 ## Expected Success Response
 
+Best response when n8n waits until the workflow finishes:
+
 ```json
 {
   "success": true,
@@ -131,6 +133,14 @@ GET {{APPS_SCRIPT_URL}}?action=tenantByRoomId&roomId=A101
   "message": "Bill created and sent to tenant successfully."
 }
 ```
+
+If the n8n Webhook node uses `Respond: Immediately`, n8n may return plain text like:
+
+```text
+Workflow was started
+```
+
+The Vercel API treats that HTTP 2xx response as success and returns normalized JSON to the browser. In this mode the success page uses the submitted form values and shows the bill reference as `รอ n8n สร้างเลขอ้างอิง` because n8n did not return the final `BillID`.
 
 ## Expected Error Response
 
