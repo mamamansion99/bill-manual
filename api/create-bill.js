@@ -24,12 +24,8 @@ function normalizeN8nResult({ raw, response, payload }) {
     parsed = null;
   }
 
-  if (parsed && typeof parsed === "object") {
-    return parsed;
-  }
-
   if (response.ok) {
-    return {
+    const normalized = {
       success: true,
       billId: "",
       room: payload.room,
@@ -38,6 +34,31 @@ function normalizeN8nResult({ raw, response, payload }) {
       status: "Workflow Started",
       message: raw || "Workflow was started",
       responseMode: "immediate",
+    };
+
+    if (parsed && typeof parsed === "object" && !Array.isArray(parsed)) {
+      return {
+        ...normalized,
+        ...parsed,
+        success: true,
+        billId: parsed.billId || parsed.BillID || parsed.billID || normalized.billId,
+        room: parsed.room || parsed.roomId || normalized.room,
+        billTitle: parsed.billTitle || parsed.title || normalized.billTitle,
+        amountDue: parsed.amountDue || parsed.amount || normalized.amountDue,
+        status: parsed.status || normalized.status,
+        message: parsed.message || normalized.message,
+        responseMode: parsed.responseMode || normalized.responseMode,
+      };
+    }
+
+    return normalized;
+  }
+
+  if (parsed && typeof parsed === "object" && !Array.isArray(parsed)) {
+    return {
+      ...parsed,
+      success: false,
+      message: parsed.message || parsed.error || raw || "n8n request failed",
     };
   }
 
