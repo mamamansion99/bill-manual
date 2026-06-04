@@ -216,10 +216,12 @@ const fields = {
   billTitle: document.querySelector("#bill-title"),
   amountDue: document.querySelector("#amount-due"),
   dueDate: document.querySelector("#due-date"),
+  parkingUntilDate: document.querySelector("#parking-until-date"),
   billDescription: document.querySelector("#bill-description"),
   createdBy: document.querySelector("#created-by"),
 };
 
+const parkingUntilField = document.querySelector("#parking-until-field");
 const tenantLookupStatus = document.querySelector("#tenant-lookup-status");
 const tenantLookupDetails = document.querySelector("#tenant-lookup-details");
 const tenantPhoneDisplay = document.querySelector("#tenant-phone-display");
@@ -233,6 +235,8 @@ const editButton = document.querySelector("#edit-button");
 const newBillButton = document.querySelector("#new-bill-button");
 const logoutButton = document.querySelector("#logout-button");
 const errorDetail = document.querySelector("#error-detail");
+const summaryParkingUntil = document.querySelector("#summary-parking-until");
+const summaryParkingUntilDate = document.querySelector("#summary-parking-until-date");
 
 let lastPayload = null;
 let tenantLookupController = null;
@@ -290,6 +294,20 @@ function setDefaultDueDate() {
   const tomorrow = new Date();
   tomorrow.setDate(tomorrow.getDate() + 1);
   fields.dueDate.value = tomorrow.toISOString().slice(0, 10);
+}
+
+function isParkingBillType() {
+  return fields.billType.value === "PARKING";
+}
+
+function syncParkingUntilField() {
+  const showParkingUntil = isParkingBillType();
+  parkingUntilField.hidden = !showParkingUntil;
+  fields.parkingUntilDate.required = showParkingUntil;
+
+  if (!showParkingUntil) {
+    fields.parkingUntilDate.value = "";
+  }
 }
 
 function showScreen(name) {
@@ -492,6 +510,8 @@ function handleFloorChange() {
 
 function applyBillTypeDefaults() {
   const defaults = BILL_TYPE_DEFAULTS[fields.billType.value];
+  syncParkingUntilField();
+
   if (!defaults) {
     return;
   }
@@ -516,6 +536,7 @@ function getPayload() {
     billDescription: fields.billDescription.value.trim(),
     amountDue: Number(fields.amountDue.value),
     dueDate: fields.dueDate.value,
+    parkingUntilDate: isParkingBillType() ? fields.parkingUntilDate.value : "",
     createdBy: fields.createdBy.value,
     source: "WEBAPP_BILL_CREATE",
   };
@@ -546,6 +567,10 @@ function validatePayload(payload) {
   const defaults = BILL_TYPE_DEFAULTS[payload.billType];
   if (defaults?.requireDescription && !payload.billDescription) {
     return "กรุณากรอกรายละเอียดเพิ่มเติมสำหรับบิลประเภทนี้";
+  }
+
+  if (payload.billType === "PARKING" && !payload.parkingUntilDate) {
+    return "กรุณาเลือกวันที่จอดถึงสำหรับค่าที่จอดรถ";
   }
 
   return "";
@@ -592,6 +617,8 @@ function showSuccess(result, payload) {
   document.querySelector("#summary-title").textContent = result.billTitle || payload.billTitle;
   document.querySelector("#summary-amount").textContent = `${formatMoney(result.amountDue || payload.amountDue)} บาท`;
   document.querySelector("#summary-bill-id").textContent = result.billId || "รอ n8n สร้างเลขอ้างอิง";
+  summaryParkingUntil.hidden = payload.billType !== "PARKING";
+  summaryParkingUntilDate.textContent = payload.billType === "PARKING" ? formatDateOnly(payload.parkingUntilDate) : "-";
   showScreen("success");
 }
 
@@ -629,6 +656,7 @@ function resetForm() {
   resetSelect(fields.room, "เลือกห้อง", true);
   clearTenant();
   setDefaultDueDate();
+  syncParkingUntilField();
   setFormError("");
   setTenantLookupStatus("เลือกตึก ชั้น และห้อง เพื่อโหลดข้อมูลลูกบ้าน");
 }
@@ -669,6 +697,7 @@ logoutButton.addEventListener("click", () => {
 
 populateBuildings();
 setDefaultDueDate();
+syncParkingUntilField();
 
 if (getSessionToken()) {
   showScreen("form");

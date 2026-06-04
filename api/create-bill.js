@@ -13,6 +13,10 @@ function validateBillPayload(payload) {
     return "amountDue must be greater than 0";
   }
 
+  if (payload.billType === "PARKING" && !payload.parkingUntilDate) {
+    return "parkingUntilDate is required for PARKING bills";
+  }
+
   return "";
 }
 

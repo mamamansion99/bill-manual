@@ -143,6 +143,11 @@
             </label>
           </div>
 
+          <label class="field" id="parking-until-field" hidden>
+            <span>จอดถึงวันที่ (Parking until)</span>
+            <input id="parking-until-date" name="parkingUntilDate" type="date" />
+          </label>
+
           <label class="field">
             <span>รายละเอียดเพิ่มเติม</span>
             <textarea
@@ -210,6 +215,10 @@
               <div>
                 <dt>ยอดชำระ</dt>
                 <dd id="summary-amount">-</dd>
+              </div>
+              <div id="summary-parking-until" hidden>
+                <dt>จอดถึงวันที่</dt>
+                <dd id="summary-parking-until-date">-</dd>
               </div>
               <div>
                 <dt>เลขอ้างอิง</dt>
