@@ -2,16 +2,15 @@
 
 Mobile-first manager webapp for creating one-off tenant bills and sending them to an n8n webhook.
 
-This version is structured for public Vercel deployment. The browser does not contain the Apps Script URL, n8n webhook URL, manager password, or shared secrets.
+This version is structured for public Vercel deployment. The browser does not contain the Apps Script URL, n8n webhook URL, or shared secrets.
 
 ## Files
 
 - `index.html` - form, loading screen, success screen, and error screen.
 - `styles.css` - mobile-first visual styling and loading animation.
 - `app.js` - tenant data, bill type defaults, validation, and n8n submit logic.
-- `api/login.js` - password login endpoint.
-- `api/tenant-lookup.js` - protected Apps Script proxy.
-- `api/create-bill.js` - protected n8n proxy.
+- `api/tenant-lookup.js` - Apps Script proxy.
+- `api/create-bill.js` - n8n proxy.
 - `.env.example` - required deployment environment variables.
 
 ## Setup
@@ -25,8 +24,6 @@ This version is structured for public Vercel deployment. The browser does not co
 Required:
 
 ```text
-MANAGER_PASSWORD=strong password used on the login screen
-AUTH_SECRET=random long string for signing login sessions
 APPS_SCRIPT_URL=https://script.google.com/macros/s/.../exec
 N8N_WEBHOOK_URL=https://.../webhook/...
 ```
@@ -51,10 +48,9 @@ N8N_SHARED_SECRET=sent to n8n as X-Mama-Secret header
 
 - Do not put `N8N_WEBHOOK_URL` in `app.js`.
 - Do not put `APPS_SCRIPT_URL` in `app.js`.
-- Use a strong `MANAGER_PASSWORD`.
-- Use a long random `AUTH_SECRET`.
 - Add `N8N_SHARED_SECRET` checking inside n8n before creating a bill.
 - Add `APPS_SCRIPT_SHARED_SECRET` checking inside Apps Script if tenant lookup should reject direct unauthenticated calls.
+- The webapp has no password screen. Anyone with the URL can open the form unless access is restricted elsewhere.
 
 ## Room Information Lookup
 

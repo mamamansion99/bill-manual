@@ -1,5 +1,3 @@
-const SESSION_TOKEN_KEY = "mama_bill_manager_session";
-
 const ROOM_IDS = [
   "A601",
   "A602",
@@ -191,17 +189,12 @@ const dateOnlyFormatter = new Intl.DateTimeFormat("th-TH", {
 });
 
 const screens = {
-  login: document.querySelector("#login-screen"),
   form: document.querySelector("#form-screen"),
   loading: document.querySelector("#loading-screen"),
   success: document.querySelector("#success-screen"),
   error: document.querySelector("#error-screen"),
 };
 
-const loginForm = document.querySelector("#login-form");
-const managerPasswordInput = document.querySelector("#manager-password");
-const loginButton = document.querySelector("#login-button");
-const loginError = document.querySelector("#login-error");
 const form = document.querySelector("#bill-form");
 const fields = {
   building: document.querySelector("#building"),
@@ -236,7 +229,6 @@ const resetButton = document.querySelector("#reset-button");
 const retryButton = document.querySelector("#retry-button");
 const editButton = document.querySelector("#edit-button");
 const newBillButton = document.querySelector("#new-bill-button");
-const logoutButton = document.querySelector("#logout-button");
 const errorDetail = document.querySelector("#error-detail");
 const summaryParkingUntil = document.querySelector("#summary-parking-until");
 const summaryParkingUntilDate = document.querySelector("#summary-parking-until-date");
@@ -269,18 +261,6 @@ function parseJsonText(text) {
   } catch {
     return null;
   }
-}
-
-function getSessionToken() {
-  return sessionStorage.getItem(SESSION_TOKEN_KEY) || "";
-}
-
-function setSessionToken(token) {
-  sessionStorage.setItem(SESSION_TOKEN_KEY, token);
-}
-
-function clearSessionToken() {
-  sessionStorage.removeItem(SESSION_TOKEN_KEY);
 }
 
 function formatDateOnly(dateText) {
@@ -328,61 +308,9 @@ function showScreen(name) {
   window.scrollTo({ top: 0, behavior: "smooth" });
 }
 
-function setLoginError(message) {
-  loginError.textContent = message;
-  loginError.hidden = !message;
-}
-
 function setFormError(message) {
   formError.textContent = message;
   formError.hidden = !message;
-}
-
-async function authenticatedFetch(url, options = {}) {
-  const token = getSessionToken();
-  const headers = new Headers(options.headers || {});
-  headers.set("Authorization", `Bearer ${token}`);
-
-  const response = await fetch(url, {
-    ...options,
-    headers,
-  });
-
-  if (response.status === 401) {
-    clearSessionToken();
-    showScreen("login");
-    throw new Error("กรุณาเข้าสู่ระบบอีกครั้ง");
-  }
-
-  return response;
-}
-
-async function login(password) {
-  loginButton.disabled = true;
-  setLoginError("");
-
-  try {
-    const response = await fetch("/api/login", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({ password }),
-    });
-    const result = await response.json();
-
-    if (!response.ok || !result.success || !result.token) {
-      throw new Error(result.message || "เข้าสู่ระบบไม่สำเร็จ");
-    }
-
-    setSessionToken(result.token);
-    managerPasswordInput.value = "";
-    showScreen("form");
-  } catch (error) {
-    setLoginError(error.message || "เข้าสู่ระบบไม่สำเร็จ");
-  } finally {
-    loginButton.disabled = false;
-  }
 }
 
 function setTenantLookupStatus(message, isError = false) {
@@ -453,7 +381,7 @@ async function requestTenantByRoomId(roomId) {
   const url = new URL("/api/tenant-lookup", window.location.origin);
   url.searchParams.set("roomId", roomId);
 
-  const response = await authenticatedFetch(url.toString(), {
+  const response = await fetch(url.toString(), {
     method: "GET",
     cache: "no-store",
     signal: tenantLookupController?.signal,
@@ -612,7 +540,7 @@ function createDemoBillId() {
 }
 
 async function submitToWebhook(payload) {
-  const response = await authenticatedFetch("/api/create-bill", {
+  const response = await fetch("/api/create-bill", {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
@@ -692,11 +620,6 @@ fields.floor.addEventListener("change", handleFloorChange);
 fields.room.addEventListener("change", updateTenantFromRoom);
 fields.billType.addEventListener("change", applyBillTypeDefaults);
 
-loginForm.addEventListener("submit", (event) => {
-  event.preventDefault();
-  login(managerPasswordInput.value);
-});
-
 form.addEventListener("submit", (event) => {
   event.preventDefault();
   submitBill();
@@ -715,16 +638,6 @@ newBillButton.addEventListener("click", () => {
   resetForm();
   showScreen("form");
 });
-logoutButton.addEventListener("click", () => {
-  clearSessionToken();
-  resetForm();
-  showScreen("login");
-});
-
 populateBuildings();
 setDefaultDueDate();
 syncParkingUntilField();
-
-if (getSessionToken()) {
-  showScreen("form");
-}

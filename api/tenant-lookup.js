@@ -1,4 +1,4 @@
-const { requireAuth, sendJson } = require("./_auth");
+const { sendJson } = require("./_auth");
 
 function getRoomId(req) {
   const baseUrl = `https://${req.headers.host || "localhost"}`;
@@ -9,10 +9,6 @@ function getRoomId(req) {
 module.exports = async function handler(req, res) {
   if (req.method !== "GET") {
     sendJson(res, 405, { success: false, message: "Method not allowed" });
-    return;
-  }
-
-  if (!requireAuth(req, res)) {
     return;
   }
 

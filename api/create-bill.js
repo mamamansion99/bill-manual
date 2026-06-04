@@ -1,4 +1,4 @@
-const { readJsonBody, requireAuth, sendJson } = require("./_auth");
+const { readJsonBody, sendJson } = require("./_auth");
 
 function validateBillPayload(payload) {
   const required = ["room", "building", "floor", "tenantName", "billType", "billTitle", "amountDue", "dueDate", "createdBy"];
@@ -83,10 +83,6 @@ function normalizeN8nResult({ raw, response, payload }) {
 module.exports = async function handler(req, res) {
   if (req.method !== "POST") {
     sendJson(res, 405, { success: false, message: "Method not allowed" });
-    return;
-  }
-
-  if (!requireAuth(req, res)) {
     return;
   }
 
