@@ -17,6 +17,14 @@ function validateBillPayload(payload) {
     return "parkingUntilDate is required for PARKING bills";
   }
 
+  if (payload.billType === "PARKING" && !payload.carBrand) {
+    return "carBrand is required for PARKING bills";
+  }
+
+  if (payload.billType === "PARKING" && !payload.carPlateNumber) {
+    return "carPlateNumber is required for PARKING bills";
+  }
+
   return "";
 }
 

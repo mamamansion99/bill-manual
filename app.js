@@ -217,11 +217,14 @@ const fields = {
   amountDue: document.querySelector("#amount-due"),
   dueDate: document.querySelector("#due-date"),
   parkingUntilDate: document.querySelector("#parking-until-date"),
+  carBrand: document.querySelector("#car-brand"),
+  carPlateNumber: document.querySelector("#car-plate-number"),
   billDescription: document.querySelector("#bill-description"),
   createdBy: document.querySelector("#created-by"),
 };
 
 const parkingUntilField = document.querySelector("#parking-until-field");
+const parkingCarFields = document.querySelector("#parking-car-fields");
 const tenantLookupStatus = document.querySelector("#tenant-lookup-status");
 const tenantLookupDetails = document.querySelector("#tenant-lookup-details");
 const tenantPhoneDisplay = document.querySelector("#tenant-phone-display");
@@ -237,6 +240,10 @@ const logoutButton = document.querySelector("#logout-button");
 const errorDetail = document.querySelector("#error-detail");
 const summaryParkingUntil = document.querySelector("#summary-parking-until");
 const summaryParkingUntilDate = document.querySelector("#summary-parking-until-date");
+const summaryCarBrand = document.querySelector("#summary-car-brand");
+const summaryCarBrandValue = document.querySelector("#summary-car-brand-value");
+const summaryCarPlate = document.querySelector("#summary-car-plate");
+const summaryCarPlateValue = document.querySelector("#summary-car-plate-value");
 
 let lastPayload = null;
 let tenantLookupController = null;
@@ -303,10 +310,15 @@ function isParkingBillType() {
 function syncParkingUntilField() {
   const showParkingUntil = isParkingBillType();
   parkingUntilField.hidden = !showParkingUntil;
+  parkingCarFields.hidden = !showParkingUntil;
   fields.parkingUntilDate.required = showParkingUntil;
+  fields.carBrand.required = showParkingUntil;
+  fields.carPlateNumber.required = showParkingUntil;
 
   if (!showParkingUntil) {
     fields.parkingUntilDate.value = "";
+    fields.carBrand.value = "";
+    fields.carPlateNumber.value = "";
   }
 }
 
@@ -537,6 +549,8 @@ function getPayload() {
     amountDue: Number(fields.amountDue.value),
     dueDate: fields.dueDate.value,
     parkingUntilDate: isParkingBillType() ? fields.parkingUntilDate.value : "",
+    carBrand: isParkingBillType() ? fields.carBrand.value.trim() : "",
+    carPlateNumber: isParkingBillType() ? fields.carPlateNumber.value.trim() : "",
     createdBy: fields.createdBy.value,
     source: "WEBAPP_BILL_CREATE",
   };
@@ -571,6 +585,14 @@ function validatePayload(payload) {
 
   if (payload.billType === "PARKING" && !payload.parkingUntilDate) {
     return "กรุณาเลือกวันที่จอดถึงสำหรับค่าที่จอดรถ";
+  }
+
+  if (payload.billType === "PARKING" && !payload.carBrand) {
+    return "กรุณากรอกยี่ห้อรถสำหรับค่าที่จอดรถ";
+  }
+
+  if (payload.billType === "PARKING" && !payload.carPlateNumber) {
+    return "กรุณากรอกทะเบียนรถสำหรับค่าที่จอดรถ";
   }
 
   return "";
@@ -619,6 +641,10 @@ function showSuccess(result, payload) {
   document.querySelector("#summary-bill-id").textContent = result.billId || "รอ n8n สร้างเลขอ้างอิง";
   summaryParkingUntil.hidden = payload.billType !== "PARKING";
   summaryParkingUntilDate.textContent = payload.billType === "PARKING" ? formatDateOnly(payload.parkingUntilDate) : "-";
+  summaryCarBrand.hidden = payload.billType !== "PARKING";
+  summaryCarBrandValue.textContent = payload.billType === "PARKING" ? payload.carBrand : "-";
+  summaryCarPlate.hidden = payload.billType !== "PARKING";
+  summaryCarPlateValue.textContent = payload.billType === "PARKING" ? payload.carPlateNumber : "-";
   showScreen("success");
 }
 

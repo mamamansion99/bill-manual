@@ -44,6 +44,10 @@ textarea {
   display: none;
 }
 
+[hidden] {
+  display: none !important;
+}
+
 .screen-active {
   display: block;
 }

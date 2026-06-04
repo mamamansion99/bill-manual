@@ -148,6 +148,18 @@
             <input id="parking-until-date" name="parkingUntilDate" type="date" />
           </label>
 
+          <div class="field-grid two-columns" id="parking-car-fields" hidden>
+            <label class="field">
+              <span>ยี่ห้อรถ</span>
+              <input id="car-brand" name="carBrand" type="text" placeholder="เช่น Toyota" />
+            </label>
+
+            <label class="field">
+              <span>ทะเบียนรถ</span>
+              <input id="car-plate-number" name="carPlateNumber" type="text" placeholder="เช่น กข 1234" />
+            </label>
+          </div>
+
           <label class="field">
             <span>รายละเอียดเพิ่มเติม</span>
             <textarea
@@ -219,6 +231,14 @@
               <div id="summary-parking-until" hidden>
                 <dt>จอดถึงวันที่</dt>
                 <dd id="summary-parking-until-date">-</dd>
+              </div>
+              <div id="summary-car-brand" hidden>
+                <dt>ยี่ห้อรถ</dt>
+                <dd id="summary-car-brand-value">-</dd>
+              </div>
+              <div id="summary-car-plate" hidden>
+                <dt>ทะเบียนรถ</dt>
+                <dd id="summary-car-plate-value">-</dd>
               </div>
               <div>
                 <dt>เลขอ้างอิง</dt>
